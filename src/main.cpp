@@ -1,37 +1,45 @@
+/*
+* Compiles after changes made in the framework location of FreeRTOSConfig.h:
+* ~/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/freertos/freertos/FreeRTOSConfig.h
+*/
 #include <Arduino.h>
 
-#include <freeRTOS/freeRTOSConfig.h>
-
-#define SMALL_TEST 1
-
-//#define configAssert(x) if( (x) == 0) { taskDISABLE_INTERRUPS(); for(;;); }
-
 static void taskOneHandler(void *pvParam);
+/*
 static void taskTwoHandler(void *pvParam);
+*/
 
 void setup() 
 {
   Serial.begin(115200);
   vTaskDelay(500 / portTICK_PERIOD_MS);
 
-  Serial.printf("\nSetup() %d\n", MY_FREE_RTOS_CONFIG);
+  Serial.printf("\nSetup() MY_FREE_RTOS_CONFIG: %d\n", MY_FREE_RTOS_CONFIG);
+  Serial.printf("configUSE_PREEMPTION: %d\n", configUSE_PREEMPTION);
+  Serial.printf("configMAX_PRIORITIES: %d\n\n", configMAX_PRIORITIES);
+
 
   TaskHandle_t taskOneHandle = NULL;   // actually a pointer
-  TaskHandle_t taskTwoHandle = NULL;
+  //TaskHandle_t taskTwoHandle = NULL;
 
-  BaseType_t status;            // 32-bits variable
+  BaseType_t status;                   // 32-bits variable
 
-  const char* textOne = "1111111111111111111111111111111111111";
-  const char* textTwo = "2222222222222222222222222222222222222";
+  //const char* textOne = "1111111111111111111111111111111111111";
+  //const char* textTwo = "2222222222222222222222222222222222222";
 
-  status = xTaskCreate(taskOneHandler, 
+
+  status = xTaskCreatePinnedToCore(
+              taskOneHandler, 
               "Task-1", 
               1024,
-              (void*)textOne,
-              12,
-              &taskOneHandle);
+              NULL, //(void*)textOne,
+              2,
+              &taskOneHandle,
+              1);
 
   configASSERT(status = pdPASS);  // if evaluate to 1, no activation
+
+/*
 
   status = xTaskCreate(taskTwoHandler, 
               "Task-2", 
@@ -41,7 +49,7 @@ void setup()
               &taskTwoHandle);
 
   configASSERT(status = pdPASS);  // if evaluate to 1, no activation
-
+*/
 
 } // end setup() -------------------------------------------------------------
 
@@ -55,11 +63,12 @@ void loop() {
 //
 static void taskOneHandler(void *pvParam)
 {
-  const char* localTextOne = (char*) pvParam;
+  //const char* localTextOne = (char*) pvParam;
+  const char* localTextOne = "1111111111111111111111111111111111111";
 
   for (;;)
   {
-    Serial.printf("localTextOne: %s", localTextOne);
+    Serial.printf("localTextOne: %s\n", localTextOne);  // (char*) pvParam); // 
   }
 
   vTaskDelete(NULL);
@@ -67,7 +76,7 @@ static void taskOneHandler(void *pvParam)
 } // end taskOneHandler()
 
 
-
+/*
 static void taskTwoHandler(void *pvParam)
 {
   const char* localTextTwo = (char*) pvParam;
@@ -80,3 +89,4 @@ static void taskTwoHandler(void *pvParam)
   vTaskDelete(NULL);
   
 } // end taskTwoHandler()
+*/
