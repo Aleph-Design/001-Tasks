@@ -24,23 +24,21 @@ void setup()
 
   BaseType_t status;                   // 32-bits variable
 
-  //const char* textOne = "1111111111111111111111111111111111111";
+  const char* textOne = "1111111111111111111111111111111111111";
   //const char* textTwo = "2222222222222222222222222222222222222";
 
-
-  status = xTaskCreatePinnedToCore(
+  status = xTaskCreate(
               taskOneHandler, 
               "Task-1", 
-              1024,
-              NULL, //(void*)textOne,
+              2048,
+              (void*)textOne,
               2,
-              &taskOneHandle,
-              1);
+              &taskOneHandle);
+              //1);
 
   configASSERT(status = pdPASS);  // if evaluate to 1, no activation
 
 /*
-
   status = xTaskCreate(taskTwoHandler, 
               "Task-2", 
               1024,
@@ -64,11 +62,11 @@ void loop() {
 static void taskOneHandler(void *pvParam)
 {
   //const char* localTextOne = (char*) pvParam;
-  const char* localTextOne = "1111111111111111111111111111111111111";
+  //const char* localTextOne = "1111111111111111111111111111111111111";
 
   for (;;)
   {
-    Serial.printf("localTextOne: %s\n", localTextOne);  // (char*) pvParam); // 
+    Serial.printf("localTextOne: %s\n", (char*) pvParam);
   }
 
   vTaskDelete(NULL);
